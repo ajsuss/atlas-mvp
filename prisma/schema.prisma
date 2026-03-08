@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TimePrecision {
+  CENTURY
+  DECADE
+  YEAR
+  MONTH
+  DAY
+  HOUR
+  MINUTE
+  SECOND
+}
+
+model Event {
+  id          String      @id @default(cuid())
+  title       String
+  slug        String      @unique
+  startDate   DateTime
+  endDate     DateTime?
+  precision   TimePrecision
+  latitude    Float
+  longitude   Float
+  summary     String
+  description String
+
+  parentId String?
+  parent   Event?  @relation("ParentChildEvents", fields: [parentId], references: [id])
+  children Event[] @relation("ParentChildEvents")
+
+  relatedTo   Event[] @relation("RelatedEvents")
+  relatedFrom Event[] @relation("RelatedEvents")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([startDate])
+  @@map("events")
+}
